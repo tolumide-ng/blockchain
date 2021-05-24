@@ -1,4 +1,5 @@
 pub type BlockHash = Vec<u8>;
+pub type Address = String;
 
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -74,3 +75,5 @@ mod block;
 pub use block::block::Block;
 pub use block::blockchain::BlockChain;
 pub use block::hashable::HashHable;
+pub use block::transaction::Output;
+pub use block::transaction::Transaction;

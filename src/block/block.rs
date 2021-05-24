@@ -1,6 +1,8 @@
 use std::fmt::{self, Debug, Formatter};
 
-use crate::{difficulty_bytes_as_u128, u128_bytes, u32_bytes, u64_bytes, BlockHash, HashHable};
+use crate::{
+    difficulty_bytes_as_u128, u128_bytes, u32_bytes, u64_bytes, BlockHash, HashHable, Transaction,
+};
 
 pub struct Block {
     pub index: u32,
@@ -8,8 +10,8 @@ pub struct Block {
     pub hash: BlockHash,
     pub prev_block_hash: BlockHash,
     pub nonce: u64,
-    pub payload: String,
     pub difficulty: u128,
+    pub transactions: Vec<Transaction>,
 }
 
 impl Debug for Block {
@@ -20,7 +22,7 @@ impl Debug for Block {
             &self.index,
             hex::encode(&self.hash),
             &self.timestamp,
-            &self.payload,
+            &self.transactions.len(),
             &self.nonce
         )
     }
@@ -31,16 +33,15 @@ impl Block {
         index: u32,
         timestamp: u128,
         prev_block_hash: BlockHash,
-        nonce: u64,
-        payload: String,
+        transactions: Vec<Transaction>,
         difficulty: u128,
     ) -> Self {
         Block {
             index,
             timestamp,
             prev_block_hash,
-            nonce,
-            payload,
+            nonce: 0,
+            transactions,
             hash: vec![0; 32],
             difficulty,
         }
@@ -67,7 +68,12 @@ impl HashHable for Block {
         bytes.extend(&u128_bytes(&self.timestamp));
         bytes.extend(&self.prev_block_hash);
         bytes.extend(&u64_bytes(&self.nonce));
-        bytes.extend(self.payload.as_bytes());
+        bytes.extend(
+            self.transactions
+                .iter()
+                .flat_map(|transaction| transaction.bytes())
+                .collect::<Vec<u8>>(),
+        );
         bytes.extend(&u128_bytes(&self.difficulty));
 
         return bytes;
